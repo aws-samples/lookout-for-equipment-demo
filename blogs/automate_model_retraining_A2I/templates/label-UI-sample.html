@@ -1,0 +1,66 @@
+<script src="https://assets.crowd.aws/crowd-html-elements.js"></script>
+
+<style>
+  table, tr, th, td {
+    border: 1px solid black;
+    border-collapse: collapse;
+    padding: 5px;
+  }
+</style>
+
+<crowd-form>
+    <div>
+        <h1>Instructions</h1>
+        <p>Please review the equipment sensor inference inputs, and make corrections to anomaly predictions from the Lookout for Equipment Model. </p>
+    </div>
+   <div>
+      <h3>Equipment Sensor Data Inputs</h3>
+   <table>
+    <tr>
+        <th>TIMESTAMP</th>
+        <th>Reactive Power</th>
+        <th>Wind Speed 1</th>
+        <th>Outdoor Temp</th>
+        <th>Grid Frequency</th>
+        <th>Pitch Angle</th>
+    </tr>
+    {% for pair in task.input.signal %}
+        <tr>
+          <td>{{ pair.timestamp }}</td>
+          <td>{{ pair.reactive_power }}</td>     
+          <td>{{ pair.wind_speed_1 }}</td>
+          <td>{{ pair.outdoor_temp }}</td>     
+          <td>{{ pair.grid_frequency }}</td>
+          <td>{{ pair.pitch_angle }}</td>     
+        </tr>
+      {% endfor %}
+    </table>   
+   </div>
+    <br>
+    <h1>Enter the Start and End Time Ranges below</h1>
+    <h3>These date ranges indicate previously detected anomalies and will serve as labels for your dataset</h3>
+    <table>
+    <tr>
+        <th>START</th>
+        <th>END</th>
+    </tr>
+    {% for pair in task.input.anomaly %}
+
+        <tr>
+          <td>
+          <p>
+            <input type="text" name="lblstart{{ forloop.index }}" style="height:50%; width:100%" />
+            </p>
+            </td>
+            <td>
+            <p>
+            <input type="text" name="lblend{{ forloop.index }}" style="height:50%; width:100%" />
+            </p>
+            </td>
+        </tr>
+
+      {% endfor %}
+    </table>
+    <br>
+    <br>
+</crowd-form>

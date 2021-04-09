@@ -1,0 +1,178 @@
+<script src="https://assets.crowd.aws/crowd-html-elements.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.5.0/Chart.min.js"></script>
+
+<crowd-form>
+   <div style="margin-left: 40px">
+        <h1>Instructions</h1>
+        <p>Please review the equipment sensor inference inputs, and make corrections to anomaly predictions from the Lookout for Equipment Model.</p>
+    
+   <div>
+      <h3>Equipment Sensor Readings</h3>
+      <div style="width:75%;">
+        <canvas id="canvas"></canvas>
+      </div>
+   </div>
+    <br>
+    <h3>Select the correct equipment status below</h3>
+    <p>0 means the equipment is fine. 1 means the equipment is faulty or is in the process of wearing down</p>
+    <table>
+    <tr>
+        <th>Start</th>
+        <th>End</th>
+        <th>Predicted Anomaly</th>
+        <th>Corrected Start</th>
+        <th>Corrected End</th>
+        <th>Corrected Status</th>
+        <th>Comments</th>
+    </tr>
+    {% for pair in task.input.anomaly %}
+
+        <tr>
+          <td><crowd-text-area name="startts-{{ forloop.index }}" value="{{ pair.startts }}" rows="2"></crowd-text-area></td>
+          <td><crowd-text-area name="endts-{{ forloop.index }}" value="{{ pair.endts }}" rows="2"></crowd-text-area></td>
+          <td><crowd-text-area name="ano-{{ forloop.index }}" value="{{ pair.ano }}"></crowd-text-area></td>     
+          <td>
+          <p>
+            <input type="text" name="TrueStart{{ forloop.index }}" value="{{ pair.startts }}" style="height:50%; width:100%" />
+            </p>
+            </td>
+            <td>
+            <p>
+            <input type="text" name="TrueEnd{{ forloop.index }}" value="{{ pair.endts }}" style="height:50%; width:100%" />
+            </p>
+            </td>
+            <td>
+            <p>
+            <crowd-radio-group>
+                <crowd-radio-button name="faulty-{{forloop.index}}" value="1">1-Faulty</crowd-radio-button><br>
+                <crowd-radio-button name="good-{{forloop.index}}" value="0">0-Good</crowd-radio-button>
+            </crowd-radio-group>
+            </p>
+           </td>
+           <td>
+            <p>
+            <input type="text" name="Comments{{ forloop.index }}" placeholder="Explain why you changed the value" style="height:50%; width:80%"/>
+            </p>
+           </td>
+        </tr>
+      {% endfor %}
+    </table>
+    <br>
+    </div>
+</crowd-form>
+
+<script>
+window.chartColors = {
+  red: 'rgb(255, 99, 132)',
+  orange: 'rgb(255, 159, 64)',
+  yellow: 'rgb(255, 205, 86)',
+  green: 'rgb(75, 192, 192)',
+  blue: 'rgb(54, 162, 235)',
+  purple: 'rgb(153, 102, 255)',
+  grey: 'rgb(231,233,237)'
+};
+
+var signal = "{{task.input.signal | to_json}}";
+var reactive_power = [];
+var wind_speed_1 = [];
+var outdoor_temp = [];
+var grid_frequency = [];
+var pitch_angle = [];
+var timestamps = [];
+
+
+var config = {
+  type: 'line',
+  data: {
+    labels: timestamps,
+    datasets: [{
+      label: "Reactive Power",
+      backgroundColor: window.chartColors.red,
+      borderColor: window.chartColors.red,
+      data: reactive_power,
+      fill: false,
+    }, {
+      label: "Wind Speed 1",
+      fill: false,
+      backgroundColor: window.chartColors.blue,
+      borderColor: window.chartColors.blue,
+      data: wind_speed_1,
+    }, {
+      label: "Outdoor Temp",
+      fill: false,
+      backgroundColor: window.chartColors.orange,
+      borderColor: window.chartColors.orange,
+      data: outdoor_temp,
+    }, {
+      label: "Grid Frequency",
+      fill: false,
+      backgroundColor: window.chartColors.green,
+      borderColor: window.chartColors.green,
+      data: grid_frequency,
+    }, {
+      label: "Pitch Angle",
+      fill: false,
+      backgroundColor: window.chartColors.purple,
+      borderColor: window.chartColors.purple,
+      data: pitch_angle,
+    }         
+              ]
+  },
+  options: {
+    responsive: true,
+    title:{
+      display:true,
+      text:'Equipment Sensor Readings Line Chart'
+    },
+    tooltips: {
+      mode: 'index',
+      intersect: false,
+    },
+   hover: {
+      mode: 'nearest',
+      intersect: true
+    },
+    scales: {
+      xAxes: [{
+        display: true,
+        scaleLabel: {
+          display: true,
+          labelString: 'Timestamp'
+        }
+      }],
+      yAxes: [{
+        display: true,
+        scaleLabel: {
+          display: true,
+        },
+      }]
+    }
+  }
+};
+
+document.addEventListener('all-crowd-elements-ready', populateChart);
+
+function populateChart() {
+  
+  try {
+    
+    var obj = JSON.parse(signal.replace(/&quot;/g,'"'));
+    
+    for (i = 0; i < obj.length; i++) {
+      timestamps.push(obj[i].timestamp);
+      reactive_power.push(obj[i].reactive_power);
+      wind_speed_1.push(obj[i].wind_speed_1);
+      outdoor_temp.push(obj[i].outdoor_temp);
+      grid_frequency.push(obj[i].grid_frequency);
+      pitch_angle.push(obj[i].pitch_angle);
+    }
+    
+  } catch (error) {
+    console.error(error);
+  }
+    
+  var ctx = document.getElementById("canvas").getContext("2d");
+  var myLine = new Chart(ctx, config);
+}
+  
+</script>
