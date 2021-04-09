@@ -43,10 +43,10 @@
             </td>
             <td>
             <p>
-              <input type="radio" name="faulty-{{forloop.index}}" value="1" id="1">
-              <label for="faulty-{{forloop.index}}">1-Faulty</label><br>
-              <input type="radio" name="faulty-{{forloop.index}}" value="0" id="0">
-              <label for="faulty-{{forloop.index}}">0-Good</label><br>
+            <crowd-radio-group>
+                <crowd-radio-button name="faulty-{{forloop.index}}" value="1">1-Faulty</crowd-radio-button><br>
+                <crowd-radio-button name="good-{{forloop.index}}" value="0">0-Good</crowd-radio-button>
+            </crowd-radio-group>
             </p>
            </td>
            <td>
