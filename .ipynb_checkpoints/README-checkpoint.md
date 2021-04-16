@@ -1,2 +1,0 @@
-# Amazon Lookout For Equipment
----
