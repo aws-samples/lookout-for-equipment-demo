@@ -12,4 +12,4 @@ We will walk you through the following steps:
 6. Setting up an Amazon A2I private human loop and reviewing the predictions from Amazon Lookout for Equipment
 7. Retraining your Amazon Lookout for Equipment model based on augmented datasets from Amazon A2I
 
-Please follow the instructions in the [accompanying blog post](aws.amazon.com) to clone this repository and get started with your Jupyter notebook
+Please follow the instructions in the [accompanying blog post](https://aws.amazon.com/blogs/machine-learning/detect-abnormal-equipment-behavior-and-review-predictions-using-amazon-lookout-for-equipment-and-amazon-a2i/) to clone this repository and get started with your Jupyter notebook
