@@ -607,16 +607,22 @@ class LookoutEquipmentAnalysis:
             self.labelled_ranges = eval(
                 describe_model_response['ModelMetrics']
             )['labeled_ranges']
-            self.labelled_ranges = pd.DataFrame(self.labelled_ranges)
-            self.labelled_ranges['start'] = pd.to_datetime(self.labelled_ranges['start'])
-            self.labelled_ranges['end'] = pd.to_datetime(self.labelled_ranges['end'])
+            if len(self.labelled_ranges) > 0:
+                self.labelled_ranges = pd.DataFrame(self.labelled_ranges)
+                self.labelled_ranges['start'] = pd.to_datetime(self.labelled_ranges['start'])
+                self.labelled_ranges['end'] = pd.to_datetime(self.labelled_ranges['end'])
+            else:
+                self.labelled_ranges = None
             
         self.predicted_ranges = eval(
             describe_model_response['ModelMetrics']
         )['predicted_ranges']
-        self.predicted_ranges = pd.DataFrame(self.predicted_ranges)
-        self.predicted_ranges['start'] = pd.to_datetime(self.predicted_ranges['start'])
-        self.predicted_ranges['end'] = pd.to_datetime(self.predicted_ranges['end'])
+        if len(self.predicted_ranges) > 0:
+            self.predicted_ranges = pd.DataFrame(self.predicted_ranges)
+            self.predicted_ranges['start'] = pd.to_datetime(self.predicted_ranges['start'])
+            self.predicted_ranges['end'] = pd.to_datetime(self.predicted_ranges['end'])
+        else:
+            self.predicted_ranges = None
         
     def set_time_periods(
         self, 
@@ -712,16 +718,18 @@ class LookoutEquipmentAnalysis:
         tag_df = self.df_list[tag]
         
         # Initialize the predictions dataframe:
-        predictions_df = pd.DataFrame(columns=['Prediction'], index=tag_df.index)
+        predictions_df = pd.DataFrame(columns=['Prediction'], index=tag_df.index, dtype=object)
         predictions_df['Prediction'] = 0
 
         # Loops through the predicted and labelled anomalies
         # ranges and set these predictions to 1 (predicted) 
         # or 2 (initially known):
-        for index, row in self.predicted_ranges.iterrows():
-            predictions_df.loc[row['start']:row['end'], 'Prediction'] = 1
-        for index, row in self.labelled_ranges.iterrows():
-            predictions_df.loc[row['start']:row['end'], 'Prediction'] = 2
+        if self.predicted_ranges is not None:
+            for index, row in self.predicted_ranges.iterrows():
+                predictions_df.loc[row['start']:row['end'], 'Prediction'] = 1
+        if self.labelled_ranges is not None:
+            for index, row in self.labelled_ranges.iterrows():
+                predictions_df.loc[row['start']:row['end'], 'Prediction'] = 2
 
         # Limits the analysis range to the evaluation period:
         predictions_df = predictions_df[self.training_start:self.evaluation_end]
